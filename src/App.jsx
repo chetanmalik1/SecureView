@@ -1,19 +1,17 @@
 import { useState } from 'react'
 
 export default function App() {
-  // Vasu: Dashboard filters aur search state yahan manage ho rahi hai
   const [search, setSearch] = useState('')
   const [action, setAction] = useState('all')
   const [protocol, setProtocol] = useState('')
   const [timeRange, setTimeRange] = useState('')
   const [paused, setPaused] = useState(false)
 
-  // Adi: Events aur alerts ka DS data yahan store hoga
-  const events = []
-  const alerts = []
+  // Stream state - pending socket ingestion
+  const [events, setEvents] = useState([])
+  const [alerts, setAlerts] = useState([])
 
   const hasFilter = search !== '' || action !== 'all' || protocol !== '' || timeRange !== ''
-  // console.log('filters:', { search, action, protocol })
 
   function clearFilters() {
     setSearch('')
@@ -21,7 +19,6 @@ export default function App() {
     setProtocol('')
     setTimeRange('')
   }
-
 
   return (
     <div className="dashboard">
@@ -48,7 +45,7 @@ export default function App() {
           <button
             className="topbar-btn"
             disabled
-            title="Export is disabled because there are no events to export"
+            title="No events to export"
             aria-label="Export events as CSV"
           >
             Export CSV
@@ -56,7 +53,7 @@ export default function App() {
           <button
             className="topbar-btn"
             disabled
-            title="Export is disabled because there are no events to export"
+            title="No events to export"
             aria-label="Export events as PDF"
           >
             Export PDF
@@ -116,7 +113,7 @@ export default function App() {
             className="filter-btn"
             aria-pressed={paused}
             onClick={() => setPaused(!paused)}
-            title={paused ? 'Resume the live event feed' : 'Pause the live event feed'}
+            title={paused ? 'Resume live feed' : 'Pause live feed'}
             aria-label={paused ? 'Resume feed' : 'Pause feed'}
           >
             {paused ? 'Resume' : 'Pause'}
@@ -126,7 +123,7 @@ export default function App() {
             className="filter-btn"
             disabled={!hasFilter}
             onClick={clearFilters}
-            title={hasFilter ? 'Reset all filters to defaults' : 'No active filters to clear'}
+            title={hasFilter ? 'Clear filters' : undefined}
             aria-label="Clear all filters"
           >
             Clear filters
@@ -136,7 +133,6 @@ export default function App() {
 
       <div className="content">
 
-        {/* Vasu: Live table UI render aur empty state yahan hai */}
         <section className="feed" aria-label="Live event feed">
           <div className="panel-head">
             <span className="panel-lbl">Live feed</span>
@@ -178,7 +174,7 @@ export default function App() {
                               </button>
                             </>
                           ) : (
-                            'No events yet. Waiting for a log source.'
+                            'No events yet. Waiting for log source.'
                           )}
                         </p>
                       </div>
@@ -198,26 +194,20 @@ export default function App() {
           <div className="alerts-scroll">
             {alerts.length === 0 && (
               <p className="empty">
-                Alerts appear here when the rule engine detects suspicious
-                patterns — brute-force attempts, port scans, or
-                denied-connection spikes. Connect a log source and enable
-                detection rules to begin.
+                No active alerts. Connect a log source to begin threat detection.
               </p>
             )}
           </div>
         </aside>
 
         <div className="stats">
-          {/* Adi: Min-heap se top attackers aur targeted ports ka data aayega */}
           <section className="stat-panel" aria-label="Top attackers">
             <div className="panel-head">
               <span className="panel-lbl">Top attackers</span>
             </div>
             <div className="stat-body">
               <p className="empty">
-                Source IPs ranked by event frequency will appear here once
-                log ingestion begins. Powered by the frequency map and
-                min-heap.
+                No attacker data available. Waiting for log stream.
               </p>
             </div>
           </section>
@@ -228,9 +218,7 @@ export default function App() {
             </div>
             <div className="stat-body">
               <p className="empty">
-                Destination ports ranked by hit count will appear here once
-                log ingestion begins. Powered by the frequency map and
-                min-heap.
+                No port activity recorded yet.
               </p>
             </div>
           </section>
@@ -254,8 +242,7 @@ export default function App() {
 
       </div>
 
-      {/* Adi: Queue, heap aur sliding window counters yahan bind honge */}
-      <footer className="engine" aria-label="Data-structure engine status">
+      <footer className="engine" aria-label="Engine status">
         <span className="engine-item">
           <span className="engine-lbl">queue</span>0 / 1024
         </span>
